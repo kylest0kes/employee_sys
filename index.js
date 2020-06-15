@@ -1,6 +1,7 @@
-const inquire = require('inquirer');
+const inquirer = require('inquirer');
 const mysql = require('mysql');
 const consoleTable = require('console.table');
+
 
 const connection = mysql.createConnection({
     host: "localhost",
@@ -19,5 +20,29 @@ const connection = mysql.createConnection({
   connection.connect(function(err) {
     if (err) throw err;
     console.log("connected as id " + connection.threadId + "\n");
-    connection.end();
+    init()
   });
+
+async function init() {
+    inquirer.prompt(
+        [
+            {
+                type: "list", 
+                message: "What would you like to do?",
+                choices: [
+                    "View All Employees",
+                    "Add Employee",
+                    "Remove Employee",
+                    "View All Employee Roles",
+                    "Update Employee Role",
+                    "Delete Employee Role", 
+                    "View All Departments",
+                    "Add Department",
+                    "Delete Department",
+                    "Exit Program"
+                ],
+                name: "usersfirstchoice"
+              }, 
+        ]
+    )
+}
