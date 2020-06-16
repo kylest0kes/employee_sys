@@ -36,8 +36,8 @@ async function init() {
           removeEmployee();
         } else if(userChoice.usersfirstchoice === "View All Employee Roles") {
           viewAllEmployeeRoles();
-        } else if(userChoice.usersfirstchoice === "View All Employee Roles") {
-          viewAllEmployeeRoles();
+        } else if(userChoice.usersfirstchoice === "Add Employee Role") {
+          addEmployeeRole();
         } else if(userChoice.usersfirstchoice === "Update Employee Role") {
           updateEmployeeRole();
         } else if(userChoice.usersfirstchoice === "Delete Employee Role") {
@@ -74,13 +74,25 @@ async function viewAllEmployees() {
 async function addEmployee() {
   try {
     const addEmployee = await inquirer.prompt(prompts.addEmployee);
-    init();
+    connection.query(
+      "INSERT INTO employees SET ?", 
+      {
+        first_name: addEmployee.employeeFirstName,
+        last_name: addEmployee.employeeLastName
+      },
+      function(err, res) {
+        if (err) throw err;
+        console.log("Employee")
+        init();
+      }
+    )
   }
   catch(err) {
     console.log(err);
   }
 }
 
+//take all names from the employees table and put them into a list to choose from
 async function removeEmployee() {
   try {
     init();
@@ -103,6 +115,27 @@ async function viewAllEmployeeRoles() {
   }
 }
 
+async function addEmployeeRole() {
+  try {
+    const addRole = await inquirer.prompt(prompts.addRole);
+    connection.query(
+      "INSERT INTO roles SET ?", 
+      {
+        name: addRole.roleName,
+        salary: addRole.roleSalary
+      },
+      function(err, res) {
+        if (err) throw err;
+        console.log("Employee")
+        init();
+      }
+    )
+  }
+  catch(err) {
+    console.log(err);
+  }
+}
+
 async function updateEmployeeRole() {
   try {
     init();
@@ -112,6 +145,7 @@ async function updateEmployeeRole() {
   }
 }
 
+//take all names from the roles table and put them into a list to choose from
 async function deleteEmployeeRole() {
   try {
     init();
@@ -136,13 +170,25 @@ async function viewAllDepartments() {
 
 async function addDepartment() {
   try {
-    init();
+    const addDepartment = await inquirer.prompt(prompts.addDepartment);
+    connection.query(
+      "INSERT INTO departments SET ?", 
+      {
+        name: addDepartment.departmentName
+      },
+      function(err, res) {
+        if (err) throw err;
+        console.log("Department Created")
+        init();
+      }
+    )
   }
   catch(err) {
     console.log(err);
   }
 }
 
+//take all names from the departments table and put them into a list to choose from
 async function deleteDepartment() {
   try {
     init();

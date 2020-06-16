@@ -7,6 +7,7 @@ const firstPrompt = [
             "Add Employee",
             "Remove Employee",
             "View All Employee Roles",
+            "Add Role",
             "Update Employee Role",
             "Delete Employee Role", 
             "View All Departments",
@@ -55,7 +56,48 @@ const addEmployee = [
     }
 ]
 
+const addDepartment = [
+    {
+        type: "input",
+        message: "What is the name of the Department?",
+        name: "departmentName",
+        validate: function(input) {
+            if (input !== "") {
+                return true;
+            }
+            return "Please enter a Department name."
+        }
+    }
+]
+
+const addRole = [
+    {
+        type: "input",
+        message: "What is the name of the Role?",
+        name: "roleName",
+        validate: function(input) {
+            if (input !== "") {
+                return true;
+            }
+            return "Please enter a Role name."
+        }
+    },
+    {
+        type: "input",
+        message: "What is the salary of the Role (no dollar sign)?",
+        name: "roleSalary",
+        validate: function(input) {
+            if (input !== "") {
+                return true;
+            }
+            return "Please enter a salary."
+        }
+    }
+]
+
 module.exports = {
     firstPrompt: firstPrompt,
-    addEmployee: addEmployee
+    addEmployee: addEmployee,
+    addDepartment: addDepartment,
+    addRole: addRole
 };
