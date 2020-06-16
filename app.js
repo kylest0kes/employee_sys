@@ -27,7 +27,7 @@ const connection = mysql.createConnection({
 
 async function init() {
     try {
-        const userChoice = await inquirer.prompt(prompts);
+        const userChoice = await inquirer.prompt(prompts.firstPrompt);
         if(userChoice.usersfirstchoice === "View All Employees") {
           viewAllEmployees();
         } else if(userChoice.usersfirstchoice === "Add Employee") {
@@ -50,6 +50,7 @@ async function init() {
           deleteDepartment();
         } else {
           console.log("Thank you for using the employee management system! Goodbye!");
+          connection.end();
         }
     }
     catch(err) {
@@ -59,7 +60,11 @@ async function init() {
 
 async function viewAllEmployees() {
   try {
-    
+    connection.query("SELECT * FROM employees", function(err, res) {
+      if(err) throw err;
+      console.table(res)
+      init();
+    });
   }
   catch(err) {
     console.log(err);
@@ -68,7 +73,8 @@ async function viewAllEmployees() {
 
 async function addEmployee() {
   try {
-    
+    const addEmployee = await inquirer.prompt(prompts.addEmployee);
+    init();
   }
   catch(err) {
     console.log(err);
@@ -77,7 +83,7 @@ async function addEmployee() {
 
 async function removeEmployee() {
   try {
-    
+    init();
   }
   catch(err) {
     console.log(err);
@@ -86,7 +92,11 @@ async function removeEmployee() {
 
 async function viewAllEmployeeRoles() {
   try {
-    
+    connection.query("SELECT * FROM roles", function(err, res) {
+      if(err) throw err;
+      console.table(res)
+      init();
+    });
   }
   catch(err) {
     console.log(err);
@@ -95,7 +105,7 @@ async function viewAllEmployeeRoles() {
 
 async function updateEmployeeRole() {
   try {
-    
+    init();
   }
   catch(err) {
     console.log(err);
@@ -104,7 +114,7 @@ async function updateEmployeeRole() {
 
 async function deleteEmployeeRole() {
   try {
-      
+    init();
   }
   catch(err) {
     console.log(err);
@@ -113,7 +123,11 @@ async function deleteEmployeeRole() {
 
 async function viewAllDepartments() {
   try {
-    
+    connection.query("SELECT * FROM departments", function(err, res) {
+      if(err) throw err;
+      console.table(res)
+      init();
+    });
   }
   catch(err) {
     console.log(err);
@@ -122,7 +136,7 @@ async function viewAllDepartments() {
 
 async function addDepartment() {
   try {
-    
+    init();
   }
   catch(err) {
     console.log(err);
@@ -131,7 +145,7 @@ async function addDepartment() {
 
 async function deleteDepartment() {
   try {
-    
+    init();
   }
   catch(err) {
     console.log(err);
