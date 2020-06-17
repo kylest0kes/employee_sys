@@ -1,6 +1,7 @@
 const inquirer = require('inquirer');
 const mysql = require('mysql');
 const consoleTable = require('console.table');
+const logo = require('./logo');
 
 const prompts = require("./inquirer");
 
@@ -8,13 +9,10 @@ const prompts = require("./inquirer");
 const connection = mysql.createConnection({
     host: "localhost",
   
-    // Your port; if not 3306
     port: 3306,
   
-    // Your username
     user: "root",
   
-    // Your password
     password: "develop1!",
     database: "threewheelEmployee_DB"
   });
@@ -22,6 +20,7 @@ const connection = mysql.createConnection({
   connection.connect(function(err) {
     if (err) throw err;
     console.log("connected as id " + connection.threadId + "\n");
+    console.log(logo)
     init()
   });
 
@@ -58,6 +57,7 @@ async function init() {
     }
 }
 
+//FUNCTIONS FOR EMPLOYEES
 async function viewAllEmployees() {
   try {
     connection.query("SELECT * FROM employees", function(err, res) {
@@ -102,6 +102,7 @@ async function removeEmployee() {
   }
 }
 
+//FUNCTIONS FOR EMPLOYEE ROLES
 async function viewAllEmployeeRoles() {
   try {
     connection.query("SELECT * FROM roles", function(err, res) {
@@ -155,6 +156,7 @@ async function deleteEmployeeRole() {
   }
 }
 
+//FUNCTIONS FOR DEPARTMENTS
 async function viewAllDepartments() {
   try {
     connection.query("SELECT * FROM departments", function(err, res) {
