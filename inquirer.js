@@ -45,13 +45,24 @@ const addEmployee = [
     {
         type: "list", 
         message: "What is the Employee's role?",
-        choices: ["Find out", "How to", "add all existing roles", "here"],
+        choices: function roleList() {
+            connection.query(
+                "SELECT * FROM roles", function(err, res) {
+                    if(err) throw err;
+                    const roleArr = [];
+                    for(let i = 0; i < res.length; i++) {
+                        roleArr.push(data[i].title);
+                    }
+                    return roleArr;
+                }
+            )
+        },
         name: "employeeRole"
     },
     {
         type: "list", 
         message: "Who is the Employee's manager?",
-        choices: ["Find out", "How to", "add all existing managers", "here"],
+        choices: ["Figure", "It", "Out"],
         name: "employeeManager"
     }
 ]
@@ -99,5 +110,6 @@ module.exports = {
     firstPrompt: firstPrompt,
     addEmployee: addEmployee,
     addDepartment: addDepartment,
-    addRole: addRole
+    addRole: addRole,
+
 };

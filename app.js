@@ -2,6 +2,9 @@ const inquirer = require('inquirer');
 const mysql = require('mysql');
 const consoleTable = require('console.table');
 const logo = require('./logo');
+const roleArr = [];
+const managerArr = [];
+const departmentsArr = [];
 
 const prompts = require("./inquirer");
 
@@ -19,9 +22,9 @@ const connection = mysql.createConnection({
 
   connection.connect(function(err) {
     if (err) throw err;
-    console.log("connected as id " + connection.threadId + "\n");
+    console.log("connected as id " + connection.threadId);
     console.log(logo)
-    init()
+    init();
   });
 
 async function init() {
@@ -51,6 +54,8 @@ async function init() {
           console.log("Thank you for using the employee management system! Goodbye!");
           connection.end();
         }
+        roleList();
+        depatmentList();
     }
     catch(err) {
         console.log(err);
@@ -73,7 +78,44 @@ async function viewAllEmployees() {
 
 async function addEmployee() {
   try {
-    const addEmployee = await inquirer.prompt(prompts.addEmployee);
+    const addEmployee = await inquirer.prompt(
+      [
+    {
+        type: "input",
+        message: "What is the employee's first name?",
+        name: "employeeFirstName",
+        validate: function(input) {
+            if (input !== "") {
+                return true;
+            }
+            return "Please enter a first name."
+        }
+    },
+    {
+        type: "input",
+        message: "What is the employee's last name?",
+        name: "employeeLastName",
+        validate: function(input) {
+            if (input !== "") {
+                return true;
+            }
+            return "Please enter a last name."
+        }
+    },
+    {
+        type: "list", 
+        message: "What is the Employee's role?",
+        choices: roleArr,
+        name: "employeeRole"
+    },
+    {
+        type: "list", 
+        message: "Who is the Employee's manager?",
+        choices: managerArr,
+        name: "employeeManager"
+    }
+]
+    );
     connection.query(
       "INSERT INTO employees SET ?", 
       {
@@ -82,7 +124,7 @@ async function addEmployee() {
       },
       function(err, res) {
         if (err) throw err;
-        console.log("Employee")
+        console.log("Employee Added")
         init();
       }
     )
@@ -200,3 +242,25 @@ async function deleteDepartment() {
   }
 }
 
+//FUNCTIONS TO GRAB ALL CURRENT DB INFO ON START
+function roleList() {
+  connection.query(
+      "SELECT * FROM roles", function(err, res) {
+          if(err) throw err;
+          for(let i = 0; i < res.length; i++) {
+              roleArr.push(res[i].title);
+          }
+      }
+  )
+}
+
+function depatmentList() {
+  connection.query(
+      "SELECT * FROM departments", function(err, res) {
+          if(err) throw err;
+          for(let i = 0; i < res.length; i++) {
+            departmentsArr.push(res[i].title);
+          }
+      }
+  )
+}
