@@ -2,11 +2,12 @@ const inquirer = require('inquirer');
 const mysql = require('mysql');
 const consoleTable = require('console.table');
 const logo = require('./logo');
-const roleArr = [];
-const managerArr = [];
-const departmentsArr = [];
+let roleArr = [];
+let managerArr = ["None"];
+let departmentsArr = [];
+let chosenManager, chosenManagerID;
 
-const prompts = require("./inquirer");
+const prompts = require("./prompts");
 
 
 const connection = mysql.createConnection({
@@ -29,6 +30,9 @@ const connection = mysql.createConnection({
 
 async function init() {
     try {
+        roleList();
+        depatmentList();
+        managerList();
         const userChoice = await inquirer.prompt(prompts.firstPrompt);
         if(userChoice.usersfirstchoice === "View All Employees") {
           viewAllEmployees();
@@ -54,8 +58,6 @@ async function init() {
           console.log("Thank you for using the employee management system! Goodbye!");
           connection.end();
         }
-        roleList();
-        depatmentList();
     }
     catch(err) {
         console.log(err);
@@ -78,62 +80,77 @@ async function viewAllEmployees() {
 
 async function addEmployee() {
   try {
-    const addEmployee = await inquirer.prompt(
-      [
-    {
-        type: "input",
-        message: "What is the employee's first name?",
-        name: "employeeFirstName",
-        validate: function(input) {
-            if (input !== "") {
-                return true;
-            }
-            return "Please enter a first name."
-        }
-    },
-    {
-        type: "input",
-        message: "What is the employee's last name?",
-        name: "employeeLastName",
-        validate: function(input) {
-            if (input !== "") {
-                return true;
-            }
-            return "Please enter a last name."
-        }
-    },
-    {
-        type: "list", 
-        message: "What is the Employee's role?",
-        choices: roleArr,
-        name: "employeeRole"
-    },
-    {
-        type: "list", 
-        message: "Who is the Employee's manager?",
-        choices: managerArr,
-        name: "employeeManager"
-    }
-]
-    );
     connection.query(
-      "INSERT INTO employees SET ?", 
-      {
-        first_name: addEmployee.employeeFirstName,
-        last_name: addEmployee.employeeLastName
-      },
-      function(err, res) {
-        if (err) throw err;
-        console.log("Employee Added")
-        init();
-      }
-    )
+      "SELECT * FROM employees", function(err, res){
+        let ans = inquirer.prompt(
+          [
+            {
+                type: "input",
+                message: "What is the employee's first name?",
+                name: "employeeFirstName",
+                validate: function(input) {
+                    if (input !== "") {
+                        return true;
+                    }
+                    return "Please enter a first name."
+                }
+            },
+            {
+                type: "input",
+                message: "What is the employee's last name?",
+                name: "employeeLastName",
+                validate: function(input) {
+                    if (input !== "") {
+                        return true;
+                    }
+                    return "Please enter a last name."
+                }
+            },
+            {
+                type: "list", 
+                message: "What is the Employee's role?",
+                choices: roleArr,
+                name: "employeeRole"
+            },
+            {
+                type: "list", 
+                message: "Who is the Employee's manager?",
+                choices: managerArr,
+                name: "employeeManager"
+            }
+      ]
+          ).then(function(ans) {
+            chosenManager = ans.employeeManager.split(" ");
+            for(let i = 0; i < res.length; i++) {
+              if(chosenManager[0] === res[i].first_name && chosenManager[1] === res[i].last_name) {
+                 chosenManagerID = res[i].id
+
+              }
+            }
+              connection.query(
+                "INSERT INTO employees SET ?", 
+                {
+                  first_name: ans.employeeFirstName,
+                  last_name: ans.employeeLastName,
+                  //role_id: ans.employeeRole,
+                  manager_id: chosenManagerID
+                },
+                function(err, res) {
+                  if (err) throw err;
+                  console.log("Employee Added")
+                  init();
+                }
+            
+              );
+        
+      })
+    })
   }
   catch(err) {
     console.log(err);
   }
 }
-
+console.log(chosenManager)
 //take all names from the employees table and put them into a list to choose from
 async function removeEmployee() {
   try {
@@ -147,7 +164,7 @@ async function removeEmployee() {
 //FUNCTIONS FOR EMPLOYEE ROLES
 async function viewAllEmployeeRoles() {
   try {
-    connection.query("SELECT * FROM roles", function(err, res) {
+    connection.query("SELECT * FROM roles LEFT JOIN departments ON roles.department_id = departments.id", function(err, res) {
       if(err) throw err;
       console.table(res)
       init();
@@ -160,12 +177,44 @@ async function viewAllEmployeeRoles() {
 
 async function addEmployeeRole() {
   try {
-    const addRole = await inquirer.prompt(prompts.addRole);
+    const addRole = await inquirer.prompt(
+      [
+        {
+            type: "input",
+            message: "What is the name of the Role?",
+            name: "roleName",
+            validate: function(input) {
+                if (input !== "") {
+                    return true;
+                }
+                return "Please enter a Role name."
+            }
+        },
+        {
+            type: "input",
+            message: "What is the salary of the Role (no dollar sign)?",
+            name: "roleSalary",
+            validate: function(input) {
+                if (input !== "") {
+                    return true;
+                }
+                return "Please enter a salary."
+            }
+        },
+        {
+            type: "list",
+            message: "What Department is this Role in?",
+            choices: departmentsArr,
+            name: "departmentOfRole"
+        }
+    ]
+    );
     connection.query(
       "INSERT INTO roles SET ?", 
       {
         name: addRole.roleName,
-        salary: addRole.roleSalary
+        salary: addRole.roleSalary,
+        department_id: addRole.departmentOfRole
       },
       function(err, res) {
         if (err) throw err;
@@ -245,12 +294,12 @@ async function deleteDepartment() {
 //FUNCTIONS TO GRAB ALL CURRENT DB INFO ON START
 function roleList() {
   connection.query(
-      "SELECT * FROM roles", function(err, res) {
-          if(err) throw err;
-          for(let i = 0; i < res.length; i++) {
-              roleArr.push(res[i].title);
-          }
+    "SELECT * FROM roles", function(err, res) {
+      if(err) throw err;
+      for(let i = 0; i < res.length; i++) {
+          roleArr.push(res[i].title);
       }
+    }
   )
 }
 
@@ -259,8 +308,24 @@ function depatmentList() {
       "SELECT * FROM departments", function(err, res) {
           if(err) throw err;
           for(let i = 0; i < res.length; i++) {
-            departmentsArr.push(res[i].title);
+            departmentsArr.push(res[i].name);
           }
       }
   )
+}
+
+function managerList() {
+  connection.query(
+    "SELECT * FROM employees", function(err, res) {
+      if(err) throw err;
+      for(let i = 0; i < res.length; i++) {
+         managerArr.push(`${res[i].first_name} ${res[i].last_name}`);
+      }
+    }
+  )
+}
+
+function searchEmployeeID() {
+  console.log(chosenManager)
+  
 }
