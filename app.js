@@ -5,7 +5,7 @@ const logo = require('./logo');
 let roleArr = [];
 let managerArr = ["None"];
 let departmentsArr = ["None"];
-let chosenManager, chosenManagerID, chosenRole, departmentOfRole, roleDepartmentID;
+let chosenManager, chosenManagerID, chosenRole, departmentOfRole, roleDepartmentID, newRoleID;
 
 const prompts = require("./prompts");
 
@@ -30,34 +30,36 @@ const connection = mysql.createConnection({
 
 async function init() {
     try {
-        roleList();
-        depatmentList();
-        managerList();
-        const userChoice = await inquirer.prompt(prompts.firstPrompt);
-        if(userChoice.usersfirstchoice === "View All Employees") {
-          viewAllEmployees();
-        } else if(userChoice.usersfirstchoice === "Add Employee") {
-          addEmployee();
-        } else if(userChoice.usersfirstchoice === "Remove Employee") {
-          removeEmployee();
-        } else if(userChoice.usersfirstchoice === "View All Employee Roles") {
-          viewAllEmployeeRoles();
-        } else if(userChoice.usersfirstchoice === "Add Employee Role") {
-          addEmployeeRole();
-        } else if(userChoice.usersfirstchoice === "Update Employee Role") {
-          updateEmployeeRole();
-        } else if(userChoice.usersfirstchoice === "Delete Employee Role") {
-          deleteEmployeeRole();
-        } else if(userChoice.usersfirstchoice === "View All Departments") {
-          viewAllDepartments();
-        } else if(userChoice.usersfirstchoice === "Add Department") {
-          addDepartment();
-        } else if(userChoice.usersfirstchoice === "Delete Department") {
-          deleteDepartment();
-        } else {
-          console.log("Thank you for using the employee management system! Goodbye!");
-          connection.end();
-        }
+      roleList();
+      depatmentList();
+      managerList();
+      const userChoice = await inquirer.prompt(prompts.firstPrompt);
+      if(userChoice.usersfirstchoice === "View All Employees") {
+        viewAllEmployees();
+      } else if(userChoice.usersfirstchoice === "Add Employee") {
+        addEmployee();
+      } else if(userChoice.usersfirstchoice === "Update Employee Role") {
+        updateEmployeeRole();
+      } else if(userChoice.usersfirstchoice === "Update Employee Manager") {
+        updateEmployeeManager();
+      } else if(userChoice.usersfirstchoice === "Remove Employee") {
+        removeEmployee();
+      } else if(userChoice.usersfirstchoice === "View All Employee Roles") {
+        viewAllEmployeeRoles();
+      } else if(userChoice.usersfirstchoice === "Add Employee Role") {
+        addEmployeeRole();
+      } else if(userChoice.usersfirstchoice === "Delete Employee Role") {
+        deleteEmployeeRole();
+      } else if(userChoice.usersfirstchoice === "View All Departments") {
+        viewAllDepartments();
+      } else if(userChoice.usersfirstchoice === "Add Department") {
+        addDepartment();
+      } else if(userChoice.usersfirstchoice === "Delete Department") {
+        deleteDepartment();
+      } else {
+        console.log("Thank you for using the employee management system! Goodbye!");
+        connection.end();
+      }
     }
     catch(err) {
         console.log(err);
@@ -91,72 +93,72 @@ async function addEmployee() {
         inquirer.prompt(
           [
             {
-                type: "input",
-                message: "What is the employee's first name?",
-                name: "employeeFirstName",
-                validate: function(input) {
-                    if (input !== "") {
-                        return true;
-                    }
-                    return "Please enter a first name."
-                }
+              type: "input",
+              message: "What is the employee's first name?",
+              name: "employeeFirstName",
+              validate: function(input) {
+                  if (input !== "") {
+                      return true;
+                  }
+                  return "Please enter a first name."
+              }
             },
             {
-                type: "input",
-                message: "What is the employee's last name?",
-                name: "employeeLastName",
-                validate: function(input) {
-                    if (input !== "") {
-                        return true;
-                    }
-                    return "Please enter a last name."
-                }
+              type: "input",
+              message: "What is the employee's last name?",
+              name: "employeeLastName",
+              validate: function(input) {
+                  if (input !== "") {
+                      return true;
+                  }
+                  return "Please enter a last name."
+              }
             },
             {
-                type: "list", 
-                message: "What is the Employee's role?",
-                choices: roleArr,
-                name: "employeeRole"
+              type: "list", 
+              message: "What is the Employee's role?",
+              choices: roleArr,
+              name: "employeeRole"
             },
             {
-                type: "list", 
-                message: "Who is the Employee's manager?",
-                choices: managerArr,
-                name: "employeeManager"
+              type: "list", 
+              message: "Who is the Employee's manager?",
+              choices: managerArr,
+              name: "employeeManager"
             }
       ]
-          ).then(function(ans) {
-            chosenManager = ans.employeeManager.split(" ");
+      ).then(function(ans) {
+        chosenManager = ans.employeeManager.split(" ");
+        for(let i = 0; i < res.length; i++) {
+          if(chosenManager[0] === res[i].first_name && chosenManager[1] === res[i].last_name) {
+              chosenManagerID = res[i].id
+          } 
+        }
+        connection.query(
+          "SELECT * FROM roles", function(err,res) {
+            chosenRole = ans.employeeRole
             for(let i = 0; i < res.length; i++) {
-              if(chosenManager[0] === res[i].first_name && chosenManager[1] === res[i].last_name) {
-                 chosenManagerID = res[i].id
+              if(chosenRole === res[i].title) {
+                  chosenRoleID = res[i].id
               } 
             }
             connection.query(
-              "SELECT * FROM roles", function(err,res) {
-                chosenRole = ans.employeeRole
-                for(let i = 0; i < res.length; i++) {
-                  if(chosenRole === res[i].title) {
-                     chosenRoleID = res[i].id
-                  } 
-                }
-                connection.query(
-                  "INSERT INTO employees SET ?", 
-                  {
-                    first_name: ans.employeeFirstName,
-                    last_name: ans.employeeLastName,
-                    role_id: chosenRoleID,
-                    manager_id: chosenManagerID
-                  },
-                  function(err, res) {
-                    if (err) throw err;
-                    console.log("Employee Added")
-                    init();
-                  }
-              
-                );
+              "INSERT INTO employees SET ?", 
+              {
+                first_name: ans.employeeFirstName,
+                last_name: ans.employeeLastName,
+                role_id: chosenRoleID,
+                manager_id: chosenManagerID
+              },
+              function(err, res) {
+                if (err) throw err;
+                console.log("Employee Added")
+                init();
               }
-            )        
+          
+            );
+          }
+        )        
       })
     })
   }
@@ -247,7 +249,6 @@ async function addEmployeeRole() {
       connection.query(
         "SELECT * FROM departments", function(err,res) {
           departmentOfRole = ans.departmentOfRole;
-          //console.log(departmentOfRole);
           for(let i = 0; i < res.length; i++) {
             if(departmentOfRole === res[i].name) {
               roleDepartmentID = res[i].id
@@ -277,14 +278,92 @@ async function addEmployeeRole() {
 
 async function updateEmployeeRole() {
   try {
-    init();
+    connection.query(
+      "SELECT * FROM employees", function(err, res) {
+        inquirer.prompt(
+          [
+            {
+              type: "list", 
+              message: "Who is the Employee you would like to update?",
+              choices: managerArr,
+              name: "employeeToUpdate"
+            },
+            {
+              type: "list", 
+              message: "What is the Employees new Role?",
+              choices: roleArr,
+              name: "updatedRole"
+            }
+          ]
+        ).then(function(ans) {
+          connection.query(
+            "SELECT * FROM roles", function(err, res) {
+              let newRole = ans.updatedRole;
+              let chosenEmployee = ans.employeeToUpdate.split(" ");
+              for(let i = 0; i < res.length; i++) {
+                if(newRole === res[i].title) {
+                  newRoleID = res[i].id;
+                  console.log(newRoleID)
+                }
+                connection.query(
+                  "UPDATE employees SET ? WHERE ?", 
+                  [
+                    {
+                      role_id: newRoleID
+                    },
+                    {
+                      last_name: chosenEmployee[1]
+                    }
+                  ],
+                  function(err, res) {
+                    if (err) throw err;
+                    console.log("Employee Role Updated");
+                    init();
+                  }
+                ) 
+              }
+            }
+          )
+        })
+      }
+    )
   }
   catch(err) {
     console.log(err);
   }
 }
 
-//take all names from the roles table and put them into a list to choose from
+async function updateEmployeeManager() {
+  try {
+    connection.query(
+      "SELECT * FROM employees", function(err, res) {
+        inquirer.prompt(
+          [
+            {
+              type: "list", 
+              message: "Who is the Employee you would like to update?",
+              choices: managerArr,
+              name: "employeeToUpdate"
+            },
+            {
+              type: "list", 
+              message: "Who is the Employees new Manager?",
+              choices: managerArr,
+              name: "updatedManager"
+            }
+          ]
+        ).then(function(ans) {
+          let newManager = ans.updatedManager;
+          
+        })
+      }
+    )
+  }
+  catch(err) {
+    console.log(err);
+  }
+}
+
 async function deleteEmployeeRole() {
   try {
     connection.query(
@@ -348,7 +427,6 @@ async function addDepartment() {
   }
 }
 
-//take all names from the departments table and put them into a list to choose from
 async function deleteDepartment() {
   try {
     connection.query(

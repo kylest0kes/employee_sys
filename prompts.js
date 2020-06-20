@@ -5,10 +5,11 @@ const firstPrompt = [
         choices: [
             "View All Employees",
             "Add Employee",
+            "Update Employee Role",
+            "Update Employee Manager",
             "Remove Employee",
             "View All Employee Roles",
             "Add Employee Role",
-            "Update Employee Role",
             "Delete Employee Role", 
             "View All Departments",
             "Add Department",
