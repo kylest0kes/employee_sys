@@ -4,7 +4,7 @@ const consoleTable = require('console.table');
 const logo = require('./logo');
 let roleArr = [];
 let managerArr = ["None"];
-let departmentsArr = [];
+let departmentsArr = ["None"];
 let chosenManager, chosenManagerID;
 
 const prompts = require("./prompts");
@@ -67,7 +67,13 @@ async function init() {
 //FUNCTIONS FOR EMPLOYEES
 async function viewAllEmployees() {
   try {
-    connection.query("SELECT * FROM employees", function(err, res) {
+    let query = "SELECT e.id AS id, e.first_name AS 'first name', e.last_name AS 'last name', ";
+    query += "r.title AS role, d.name AS department, r.salary AS salary ";
+    query += "FROM employees AS e LEFT JOIN roles AS r ON e.role_id = r.id ";
+    query += "LEFT JOIN departments AS d ON d.id = r.department_id ";
+    query += "ORDER BY e.id ASC";
+
+    connection.query(query, function(err, res) {
       if(err) throw err;
       console.table(res)
       init();
@@ -158,11 +164,32 @@ async function addEmployee() {
     console.log(err);
   }
 }
-console.log(chosenManager)
+
 //take all names from the employees table and put them into a list to choose from
 async function removeEmployee() {
   try {
-    init();
+    connection.query(
+      "SELECT * FROM employees", function(err, res) {
+        let deleteEmployee = inquirer.prompt(
+          {
+            type: "list", 
+            message: "What Employee would you like to remove?",
+            choices: managerArr,
+            name: "chosenEmployeeToDelete"
+          }
+        ).then(function(ans) {
+          let chosenToDelete = ans.chosenEmployeeToDelete.split(" ");
+              
+              connection.query(
+                "DELETE FROM employees WHERE first_name = ? AND last_name = ?", [chosenToDelete[0], chosenToDelete[1]], function(err, res) {
+                  if (err) throw err;
+                  console.log("Employee Removed");
+                  init();
+                }
+            )
+        
+      })
+    });
   }
   catch(err) {
     console.log(err);
@@ -292,7 +319,28 @@ async function addDepartment() {
 //take all names from the departments table and put them into a list to choose from
 async function deleteDepartment() {
   try {
-    init();
+    connection.query(
+      "SELECT * FROM departments", function(err, res) {
+        let deleteChosenDepartment = inquirer.prompt(
+          {
+            type: "list", 
+            message: "What Department would you like to remove?",
+            choices: departmentsArr,
+            name: "chosenDeptToDelete"
+          }
+        ).then(function(ans) {
+          let chosenDept = ans.chosenDeptToDelete
+          console.log(chosenDept)
+          connection.query(
+            "DELETE FROM departments WHERE ?", {name: chosenDept}, function(err, res) {
+              if (err) throw err;
+              console.log("Department Removed");
+              init();
+            }
+          )
+        })
+      }
+    )  
   }
   catch(err) {
     console.log(err);
