@@ -88,7 +88,7 @@ async function addEmployee() {
   try {
     connection.query(
       "SELECT * FROM employees", function(err, res){
-        let ans = inquirer.prompt(
+        inquirer.prompt(
           [
             {
                 type: "input",
@@ -170,7 +170,7 @@ async function removeEmployee() {
   try {
     connection.query(
       "SELECT * FROM employees", function(err, res) {
-        let deleteEmployee = inquirer.prompt(
+        inquirer.prompt(
           {
             type: "list", 
             message: "What Employee would you like to remove?",
@@ -212,7 +212,7 @@ async function viewAllEmployeeRoles() {
 
 async function addEmployeeRole() {
   try {
-    const addRole = await inquirer.prompt(
+    inquirer.prompt(
       [
         {
           type: "list",
@@ -333,7 +333,7 @@ async function deleteDepartment() {
   try {
     connection.query(
       "SELECT * FROM departments", function(err, res) {
-        let deleteChosenDepartment = inquirer.prompt(
+        inquirer.prompt(
           {
             type: "list", 
             message: "What Department would you like to remove?",
@@ -342,7 +342,6 @@ async function deleteDepartment() {
           }
         ).then(function(ans) {
           let chosenDept = ans.chosenDeptToDelete
-          console.log(chosenDept)
           connection.query(
             "DELETE FROM departments WHERE ?", {name: chosenDept}, function(err, res) {
               if (err) throw err;
