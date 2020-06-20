@@ -5,7 +5,7 @@ const logo = require('./logo');
 let roleArr = [];
 let managerArr = ["None"];
 let departmentsArr = ["None"];
-let chosenManager, chosenManagerID;
+let chosenManager, chosenManagerID, chosenRole, departmentOfRole, roleDepartmentID;
 
 const prompts = require("./prompts");
 
@@ -215,9 +215,15 @@ async function addEmployeeRole() {
     const addRole = await inquirer.prompt(
       [
         {
+          type: "list",
+          message: "What Department is this Role in?",
+          choices: departmentsArr,
+          name: "departmentOfRole"
+        },
+        {
             type: "input",
-            message: "What is the name of the Role?",
-            name: "roleName",
+            message: "What is the Title of the Role?",
+            name: "roleTitle",
             validate: function(input) {
                 if (input !== "") {
                     return true;
@@ -235,28 +241,34 @@ async function addEmployeeRole() {
                 }
                 return "Please enter a salary."
             }
-        },
-        {
-            type: "list",
-            message: "What Department is this Role in?",
-            choices: departmentsArr,
-            name: "departmentOfRole"
         }
     ]
+    ).then(function(ans) {
+      connection.query(
+        "SELECT * FROM departments", function(err,res) {
+          departmentOfRole = ans.departmentOfRole;
+          //console.log(departmentOfRole);
+          for(let i = 0; i < res.length; i++) {
+            if(departmentOfRole === res[i].name) {
+              roleDepartmentID = res[i].id
+            } 
+          }
+          connection.query(
+            "INSERT INTO roles SET ?", 
+            {
+              title: ans.roleTitle,
+              salary: ans.roleSalary,
+              department_id: roleDepartmentID
+            },
+            function(err, res) {
+              if (err) throw err;
+              console.log("Role Added")
+              init();
+            }
+          );
+        }
+      )}
     );
-    connection.query(
-      "INSERT INTO roles SET ?", 
-      {
-        name: addRole.roleName,
-        salary: addRole.roleSalary,
-        department_id: addRole.departmentOfRole
-      },
-      function(err, res) {
-        if (err) throw err;
-        console.log("Employee")
-        init();
-      }
-    )
   }
   catch(err) {
     console.log(err);
@@ -380,3 +392,7 @@ function managerList() {
     }
   )
 }
+
+
+
+        
