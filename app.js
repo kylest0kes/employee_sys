@@ -287,7 +287,27 @@ async function updateEmployeeRole() {
 //take all names from the roles table and put them into a list to choose from
 async function deleteEmployeeRole() {
   try {
-    init();
+    connection.query(
+      "SELECT * FROM roles", function(err, res) {
+        inquirer.prompt(
+          {
+            type: "list", 
+            message: "What Role would you like to remove?",
+            choices: roleArr,
+            name: "chosenRoleToDelete"
+          }
+        ).then(function(ans) {
+          let chosenRole = ans.chosenRoleToDelete
+          connection.query(
+            "DELETE FROM roles WHERE ?", {title: chosenRole}, function(err, res) {
+              if (err) throw err;
+              console.log("Role Removed");
+              init();
+            }
+          )
+        })
+      }
+    )  
   }
   catch(err) {
     console.log(err);
