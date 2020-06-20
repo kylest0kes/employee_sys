@@ -167,6 +167,121 @@ async function addEmployee() {
   }
 }
 
+async function updateEmployeeRole() {
+  try {
+    connection.query(
+      "SELECT * FROM employees", function(err, res) {
+        inquirer.prompt(
+          [
+            {
+              type: "list", 
+              message: "Who is the Employee you would like to update?",
+              choices: managerArr,
+              name: "employeeToUpdate"
+            },
+            {
+              type: "list", 
+              message: "What is the Employees new Role?",
+              choices: roleArr,
+              name: "updatedRole"
+            }
+          ]
+        ).then(function(ans) {
+          connection.query(
+            "SELECT * FROM roles", function(err, res) {
+              let newRole = ans.updatedRole;
+              let chosenEmployee = ans.employeeToUpdate.split(" ");
+              for(let i = 0; i < res.length; i++) {
+                if(newRole === res[i].title) {
+                  newRoleID = res[i].id;
+                  console.log(newRoleID)
+                }
+                connection.query(
+                  "UPDATE employees SET ? WHERE ?", 
+                  [
+                    {
+                      role_id: newRoleID
+                    },
+                    {
+                      last_name: chosenEmployee[1]
+                    }
+                  ],
+                  function(err, res) {
+                    if (err) throw err;
+                    console.log("Employee Role Updated");
+                    init();
+                  }
+                ) 
+              }
+            }
+          )
+        })
+      }
+    )
+  }
+  catch(err) {
+    console.log(err);
+  }
+}
+
+async function updateEmployeeManager() {
+  try {
+    connection.query(
+      "SELECT * FROM employees", function(err, res) {
+        inquirer.prompt(
+          [
+            {
+              type: "list", 
+              message: "Who is the Employee you would like to update?",
+              choices: managerArr,
+              name: "employeeToUpdate"
+            },
+            {
+              type: "list", 
+              message: "Who is the Employees new Manager?",
+              choices: managerArr,
+              name: "updatedManager"
+            }
+          ]
+        ).then(function(ans) {
+          connection.query(
+            "SELECT * FROM employees", function(err, res) {
+              let newManager = ans.updatedManager.split(" ");
+              let chosenEmployee = ans.employeeToUpdate.split(" ");
+              for(let i = 0; i < res.length; i++) {
+                if(newManager[1] === res[i].last_name) {
+                  newManagerID = res[i].id;
+                  console.log(newManagerID)
+                }
+                connection.query(
+                  "UPDATE employees SET ? WHERE ?", 
+                  [
+                    {
+                      manager_id: newManagerID
+                    },
+                    {
+                      last_name: chosenEmployee[1]
+                    }
+                  ],
+                  function(err, res) {
+                    if (err) throw err;
+                    console.log("Employee Manager Updated");
+                    init();
+                  }
+                ) 
+              }
+            }
+          )
+          
+        })
+      }
+    )
+  }
+  catch(err) {
+    console.log(err);
+  }
+}
+
 //take all names from the employees table and put them into a list to choose from
 async function removeEmployee() {
   try {
@@ -270,94 +385,6 @@ async function addEmployeeRole() {
         }
       )}
     );
-  }
-  catch(err) {
-    console.log(err);
-  }
-}
-
-async function updateEmployeeRole() {
-  try {
-    connection.query(
-      "SELECT * FROM employees", function(err, res) {
-        inquirer.prompt(
-          [
-            {
-              type: "list", 
-              message: "Who is the Employee you would like to update?",
-              choices: managerArr,
-              name: "employeeToUpdate"
-            },
-            {
-              type: "list", 
-              message: "What is the Employees new Role?",
-              choices: roleArr,
-              name: "updatedRole"
-            }
-          ]
-        ).then(function(ans) {
-          connection.query(
-            "SELECT * FROM roles", function(err, res) {
-              let newRole = ans.updatedRole;
-              let chosenEmployee = ans.employeeToUpdate.split(" ");
-              for(let i = 0; i < res.length; i++) {
-                if(newRole === res[i].title) {
-                  newRoleID = res[i].id;
-                  console.log(newRoleID)
-                }
-                connection.query(
-                  "UPDATE employees SET ? WHERE ?", 
-                  [
-                    {
-                      role_id: newRoleID
-                    },
-                    {
-                      last_name: chosenEmployee[1]
-                    }
-                  ],
-                  function(err, res) {
-                    if (err) throw err;
-                    console.log("Employee Role Updated");
-                    init();
-                  }
-                ) 
-              }
-            }
-          )
-        })
-      }
-    )
-  }
-  catch(err) {
-    console.log(err);
-  }
-}
-
-async function updateEmployeeManager() {
-  try {
-    connection.query(
-      "SELECT * FROM employees", function(err, res) {
-        inquirer.prompt(
-          [
-            {
-              type: "list", 
-              message: "Who is the Employee you would like to update?",
-              choices: managerArr,
-              name: "employeeToUpdate"
-            },
-            {
-              type: "list", 
-              message: "Who is the Employees new Manager?",
-              choices: managerArr,
-              name: "updatedManager"
-            }
-          ]
-        ).then(function(ans) {
-          let newManager = ans.updatedManager;
-          
-        })
-      }
-    )
   }
   catch(err) {
     console.log(err);
