@@ -124,25 +124,33 @@ async function addEmployee() {
             for(let i = 0; i < res.length; i++) {
               if(chosenManager[0] === res[i].first_name && chosenManager[1] === res[i].last_name) {
                  chosenManagerID = res[i].id
-
-              }
+              } 
             }
-              connection.query(
-                "INSERT INTO employees SET ?", 
-                {
-                  first_name: ans.employeeFirstName,
-                  last_name: ans.employeeLastName,
-                  //role_id: ans.employeeRole,
-                  manager_id: chosenManagerID
-                },
-                function(err, res) {
-                  if (err) throw err;
-                  console.log("Employee Added")
-                  init();
+            connection.query(
+              "SELECT * FROM roles", function(err,res) {
+                chosenRole = ans.employeeRole
+                for(let i = 0; i < res.length; i++) {
+                  if(chosenRole === res[i].title) {
+                     chosenRoleID = res[i].id
+                  } 
                 }
-            
-              );
-        
+                connection.query(
+                  "INSERT INTO employees SET ?", 
+                  {
+                    first_name: ans.employeeFirstName,
+                    last_name: ans.employeeLastName,
+                    role_id: chosenRoleID,
+                    manager_id: chosenManagerID
+                  },
+                  function(err, res) {
+                    if (err) throw err;
+                    console.log("Employee Added")
+                    init();
+                  }
+              
+                );
+              }
+            )        
       })
     })
   }
@@ -319,13 +327,8 @@ function managerList() {
     "SELECT * FROM employees", function(err, res) {
       if(err) throw err;
       for(let i = 0; i < res.length; i++) {
-         managerArr.push(`${res[i].first_name} ${res[i].last_name}`);
+        managerArr.push(`${res[i].first_name} ${res[i].last_name}`);
       }
     }
   )
-}
-
-function searchEmployeeID() {
-  console.log(chosenManager)
-  
 }
