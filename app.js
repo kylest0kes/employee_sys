@@ -69,7 +69,7 @@ async function init() {
 //FUNCTIONS FOR EMPLOYEES
 async function viewAllEmployees() {
   try {
-    let query = "SELECT e.id AS id, e.first_name AS 'first name', e.last_name AS 'last name', e.manager_id AS 'manager', ";
+    let query = "SELECT e.id AS id, e.first_name AS 'first name', e.last_name AS 'last name', e.manager_id AS 'manager id', ";
     query += "r.title AS role, d.name AS department, r.salary AS salary ";
     query += "FROM employees AS e LEFT JOIN roles AS r ON e.role_id = r.id ";
     query += "LEFT JOIN departments AS d ON d.id = r.department_id ";
@@ -194,25 +194,24 @@ async function updateEmployeeRole() {
               for(let i = 0; i < res.length; i++) {
                 if(newRole === res[i].title) {
                   newRoleID = res[i].id;
-                  console.log(newRoleID)
                 }
-                connection.query(
-                  "UPDATE employees SET ? WHERE ?", 
-                  [
-                    {
-                      role_id: newRoleID
-                    },
-                    {
-                      last_name: chosenEmployee[1]
-                    }
-                  ],
-                  function(err, res) {
-                    if (err) throw err;
-                    console.log("Employee Role Updated");
-                    init();
+              }  
+              connection.query(
+                "UPDATE employees SET ? WHERE ?", 
+                [
+                  {
+                    role_id: newRoleID
+                  },
+                  {
+                    last_name: chosenEmployee[1]
                   }
-                ) 
-              }
+                ],
+                function(err, res) {
+                  if (err) throw err;
+                  console.log("Employee Role Updated");
+                  init();
+                }
+              ) 
             }
           )
         })
@@ -253,23 +252,23 @@ async function updateEmployeeManager() {
                   newManagerID = res[i].id;
                   console.log(newManagerID)
                 }
-                connection.query(
-                  "UPDATE employees SET ? WHERE ?", 
-                  [
-                    {
-                      manager_id: newManagerID
-                    },
-                    {
-                      last_name: chosenEmployee[1]
-                    }
-                  ],
-                  function(err, res) {
-                    if (err) throw err;
-                    console.log("Employee Manager Updated");
-                    init();
-                  }
-                ) 
               }
+              connection.query(
+                "UPDATE employees SET ? WHERE ?", 
+                [
+                  {
+                    manager_id: newManagerID
+                  },
+                  {
+                    last_name: chosenEmployee[1]
+                  }
+                ],
+                function(err, res) {
+                  if (err) throw err;
+                  console.log("Employee Manager Updated");
+                  init();
+                }
+              ) 
             }
           )
           

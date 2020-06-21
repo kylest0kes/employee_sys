@@ -12,4 +12,4 @@ INSERT INTO employees (first_name, last_name, role_id)
 VALUES ("Kyle", "Stokes", 5), ("Johnny", "Hammersticks", 7), ("Olivia", "Pierce", 9), ("Elliot", "Alderson", 1), ("Scott", "Knowles", 3);
 
 INSERT INTO employees (first_name, last_name, role_id, manager_id)
-VALUES ("Tommy", "Noble", 6, 1), ("Samuel", "Hayden", 8, 3), ("John", "Laskey", 10, 5), ("Tyrell", "Wellick", 2, 7), ("Michael", "Scott", 4, 9);
+VALUES ("Tommy", "Noble", 6, 1), ("Samuel", "Hayden", 8, 2), ("John", "Laskey", 10, 3), ("Tyrell", "Wellick", 2, 4), ("Michael", "Scott", 4, 5)
