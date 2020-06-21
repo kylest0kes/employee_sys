@@ -3,9 +3,9 @@ const mysql = require('mysql');
 const consoleTable = require('console.table');
 const logo = require('./logo');
 let roleArr = [];
-let managerArr = ["None"];
-let departmentsArr = ["None"];
-let chosenManager, chosenManagerID, chosenRole, departmentOfRole, roleDepartmentID, newRoleID;
+let managerArr = [];
+let departmentsArr = [];
+let chosenManager, chosenManagerID, chosenRole, departmentOfRole, roleDepartmentID, newRoleID, newManagerID;
 
 const prompts = require("./prompts");
 
@@ -69,7 +69,7 @@ async function init() {
 //FUNCTIONS FOR EMPLOYEES
 async function viewAllEmployees() {
   try {
-    let query = "SELECT e.id AS id, e.first_name AS 'first name', e.last_name AS 'last name', ";
+    let query = "SELECT e.id AS id, e.first_name AS 'first name', e.last_name AS 'last name', e.manager_id AS 'manager', ";
     query += "r.title AS role, d.name AS department, r.salary AS salary ";
     query += "FROM employees AS e LEFT JOIN roles AS r ON e.role_id = r.id ";
     query += "LEFT JOIN departments AS d ON d.id = r.department_id ";
